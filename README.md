@@ -42,5 +42,12 @@ python3 main_JOBS.py --tl_weight 0.1 --latent_dim_o 4 --latent_dim_c 8 --latent_
 
 
 
+## References:
 
+Code heavily derived from TEDVAE by Weijia Zhang
+https://github.com/WeijiaZhang24/TEDVAE
+
+See also the paper:
+Zhang, W., Liu, L., and Li, J. (2020) Treatment effect estimation with disentangled
+latent factors. https://arxiv.org/pdf/2001.10652.pdf
 
