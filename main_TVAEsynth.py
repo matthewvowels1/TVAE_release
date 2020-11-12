@@ -17,7 +17,7 @@ from TVAE_wrapper import TVAE
 
 
 def main(args, reptition=1):
-    pyro.enable_validation(__debug__)
+    # pyro.enable_validation(__debug__)
     # if args.cuda:
     torch.set_default_tensor_type('torch.cuda.FloatTensor')
 

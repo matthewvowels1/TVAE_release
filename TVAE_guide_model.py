@@ -164,9 +164,6 @@ class Guide(PyroModule):
 		super().__init__()
 		# self.t_nn = BernoulliNet([config["feature_dim"]])
 		self.t_nn = BernoulliNet([config["latent_dim_c"] + config["latent_dim_t"]])
-		# The y and z networks both follow an architecture where the first few
-		# layers are shared for t in {0,1}, but the final layer is split
-		# between the two t values.
 		self.y_nn = FullyConnected([config["latent_dim_c"] + config["latent_dim_y"]] +
 								   [config["hidden_dim"]] * (config["num_layers"] - 1),
 								   final_activation=nn.ELU())
@@ -197,18 +194,13 @@ class Guide(PyroModule):
 		if size is None:
 			size = x.size(0)
 		with pyro.plate("data", size, subsample=x):
-			# The t and y sites are needed for prediction, and participate in
-			# the auxiliary CEVAE loss. We mark them auxiliary to indicate they
-			# do not correspond to latent variables during training.
 			zo = pyro.sample("zo", self.zo_dist(x))
 			zc = pyro.sample("zc", self.zc_dist(x))
 			zt = pyro.sample("zt", self.zt_dist(x))
 			zy = pyro.sample("zy", self.zy_dist(x))
 
 			t = pyro.sample("t", self.t_dist(zc, zt), obs=t, infer={"is_auxiliary": True})
-
 			y = pyro.sample("y", self.y_dist(t, zc, zy), obs=y, infer={"is_auxiliary": True})
-		# The z site participates only in the usual ELBO loss.
 
 	def t_dist(self, zc, zt):
 		input_concat = torch.cat((zc, zt), -1)

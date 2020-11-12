@@ -190,7 +190,8 @@ class TVAE(nn.Module):
 
         pred_t = pred_t.mean(0)  # probabilities
         pred_y = pred_y.mean(0)  # continuous outcome or probabilities
-        h = t / pred_t.detach() - (1 - t) / (1 - pred_t.detach())
+        h = t / pred_t - (1 - t) / (1 - pred_t)
+        # h = t / pred_t.detach() - (1 - t) / (1 - pred_t.detach())
 
         if self.config["outcome_dist"] == 'bernoulli':
             y_pert = torch.sigmoid(logit_(p=pred_y) + self.model.epsilon * h)

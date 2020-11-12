@@ -214,7 +214,7 @@ def IHDP(path="./IHDP/", reps=1, cuda=True):
     return train, test, contfeats, binfeats
 
 
-def generate_data(N, random_seed):
+def generate_data(N, random_seed):  # this INCLUDES 'miscellaneous' factors on x
     np.random.seed(random_seed)
     # exogenous noise:
     Uzo = np.random.randn(N, 1)
@@ -254,6 +254,46 @@ def generate_data(N, random_seed):
     x = np.concatenate((x1, x2, x3, x4, x5, x6, x7, x8), 1)
     return x, t, y, y1, y0
 
+def generate_data_2(N, random_seed):  # this does NOT include 'miscellaneous' factors on x
+    np.random.seed(random_seed)
+    # exogenous noise:
+    Uzo = np.random.randn(N, 1)
+    Uzc = np.random.randn(N, 1)
+    Uzt = np.random.randn(N, 1)
+    Uzy = np.random.randn(N, 1)
+    Ux1 = np.random.binomial(1, 0.5, (N, 1)) - 0.5
+    Ux2 = np.random.randn(N, 1)
+    Ux3 = np.random.randn(N, 1)
+    Ux4 = np.random.binomial(1, 0.5, (N, 1)) - 0.5
+    Ux5 = np.random.randn(N, 1)
+    Ux6 = np.random.randn(N, 1)
+    Ux7 = np.random.randn(N, 1)
+    Ux8 = np.random.randn(N, 1)
+    Ut = np.random.binomial(1, 0.5, (N, 1))
+    Uy = np.random.randn(N, 1)
+    # latents:
+    zo = 0   # this is set to 0 to remove miscellaneous factors TODO add argparse arg to automate TVAEsynth misc/nomisc
+    zc = Uzc
+    zt = Uzt + 2
+    zy = Uzy + 3
+    # observed vars:
+    x1 = np.random.binomial(1, numpy_sigmoid(zt + 0.1 * Ux1), (N, 1))
+    x2 = np.random.normal(0.4 * zo + 0.3 * zc + 0.5 * zy + 0.1 * Ux2, 0.2)
+    x3 = np.random.normal(0.2 * zo + 0.2 * zc + 1.2 * zt + 0.1 * Ux3, 0.2)
+    x4 = np.random.binomial(1, numpy_sigmoid(0.6 * zo + 0.1 * Ux4))
+    x5 = np.random.normal(0.6 * zt + 0.1 * Ux5, 0.1)
+    x6 = np.random.normal(0.9 * zy + 0.1 * Ux6, 0.1)
+    x7 = np.random.normal(0.5 * zo + 0.1 * Ux7, 0.1)
+    x8 = np.random.normal(0.5 * zo + 0.1 * Ux8, 0.1)
+    t = np.random.binomial(1, numpy_sigmoid(0.2 * zc + 0.8 * zt + 0.1 * Ut)).astype('float64')
+    y = 0.2 * zc + 0.5 * zy + 0.2 * zy * t + 0.2 * t + 0.1 * Uy
+    # ground true for causal effect:
+    y1 = 0.2 * zc + 0.5 * zy + 0.2 * zy * 1 + 0.2 * 1 + 0.1 * Uy
+    y0 = 0.2 * zc + 0.5 * zy + 0.2 * zy * 0 + 0.2 * 0 + 0.1 * Uy
+
+    x = np.concatenate((x1, x2, x3, x4, x5, x6, x7, x8), 1)
+    return x, t, y, y1, y0
+
 def TVAEsynth(rep=0, N=1000, cuda=True):
     random_seed = rep
     # which features are binary
@@ -261,7 +301,7 @@ def TVAEsynth(rep=0, N=1000, cuda=True):
     # which features are continuous
     contfeats = [1, 2]
 
-    all_x, all_t, all_y, all_y1, all_y0 = generate_data(N, random_seed)
+    all_x, all_t, all_y, all_y1, all_y0 = generate_data(N, random_seed)  # change this to generate_data_2 to remove misc factors
 
     itr, ite = train_test_split(
             np.arange(all_x.shape[0]), test_size=0.2, random_state=random_seed)
