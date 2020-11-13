@@ -40,6 +40,10 @@ python3 main_IHDP.py --tl_weight 0.4 --latent_dim_o 5 --latent_dim_c 15 --latent
 python3 main_JOBS.py --tl_weight 0.1 --latent_dim_o 4 --latent_dim_c 8 --latent_dim_t 6 --latent_dim_y 6 --hidden_dim 200 --num_layers 2 --num_epochs 150 --batch_size 200 --learning_rate 0.00001 --reps 100
 ```
 
+### ACIC:
+```
+python3 main_ACIC2016.py --tl_weight 0.3 --latent_dim_o 5 --latent_dim_c 15 --latent_dim_t 10 --latent_dim_y 10 --hidden_dim 500 --num_layers 4 --num_epochs 200 --batch_size 200 --learning_rate 0.00005 --reps 100 --jobs_version 1
+```
 
 
 ## References:

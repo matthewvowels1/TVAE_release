@@ -15,7 +15,7 @@ from pyro import poutine
 from pyro.util import torch_isnan
 from pyro.infer import Trace_ELBO
 from pyro.infer.util import torch_item
-from TVAE_guide_model import Model, Guide
+from TVAE_guide_model_ACIC2016 import Model, Guide
 from helpers import logit_, policy_val
 from torch.utils.tensorboard import SummaryWriter
 import pytz
@@ -55,14 +55,14 @@ class TraceCausalEffect_ELBO(Trace_ELBO):
 
 
 class TVAE(nn.Module):
-    def __init__(self, feature_dim, continuous_dim, binary_dim, outcome_dist="normal", latent_dim_o=20,
+    def __init__(self, feature_dim, all_indices, cat_dims, outcome_dist="normal", latent_dim_o=20,
                  latent_dim_c=20, latent_dim_t=20, latent_dim_y=20, hidden_dim=200, num_layers=3, num_samples=100,
                  tb=1, tb_dir=None):
 
         self.config = dict(feature_dim=feature_dim, latent_dim_o=latent_dim_o, latent_dim_c=latent_dim_c,
                            latent_dim_t=latent_dim_t, latent_dim_y=latent_dim_y, outcome_dist=outcome_dist,
-                           hidden_dim=hidden_dim, num_layers=num_layers, continuous_dim=continuous_dim,
-                           binary_dim=binary_dim, num_samples=num_samples, tb=tb, tb_dir=tb_dir)
+                           hidden_dim=hidden_dim, num_layers=num_layers, all_indices=all_indices, cat_dims=cat_dims,
+                           num_samples=num_samples, tb=tb, tb_dir=tb_dir)
 
         self.feature_dim = feature_dim
         self.num_samples = num_samples

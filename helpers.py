@@ -12,6 +12,8 @@ import os
 from sklearn.model_selection import train_test_split
 import torch
 import numpy as np
+from sklearn import preprocessing
+import json
 
 def numpy_sigmoid(x):
     return 1/(1 + np.exp(-x))
@@ -170,6 +172,119 @@ def JOBS(path='./JOBS/', replication_start=0, replication_end=2, version=0, cuda
         random_state += 1
 
         return train, test, contfeats, bin_feats
+
+
+def ACIC_2016(path="./ACIC_2016/", reps=1, param_setting=1, cuda=True, seed=0):
+    '''
+    P = poisson
+    B = bernoulli
+    O = one hot cat
+    N = normal
+    S = strudent t
+    L = laplace
+    E = exponential
+
+    '''
+    np.random.seed(seed)
+    df_covs = pd.read_csv(os.path.join(path, 'covariates.csv'))
+    obj_df = df_covs.select_dtypes(include=['object']).copy()
+    cat_cols = list(obj_df.columns)
+
+    for col in cat_cols:
+        cat_data = df_covs[col].values
+        le = preprocessing.LabelEncoder()
+        le.fit(cat_data)
+        encoded_data = le.transform(cat_data)
+        df_covs[col] = encoded_data
+
+    cont_cols = ['0', '3', '4', '5', '17', '18', '19', '22', '24',
+                 '25', '26', '27', '28', '33', '34', '35', '36', '40',
+                 '42', '43', '44', '56', '57']
+    bin_cols = ['16', '21', '37', '50', '53']
+    cat_cols = ['1', '23', '20']
+    count_cols = ['2', '6', '7', '8', '9', '10', '11', '12', '13',
+                  '14', '15', '29', '30', '31', '32', '38', '39', '41',
+                  '45', '46', '47', '48', '49', '51', '52', '54', '55']
+
+    dists = {'0': 'N', '1': 'O_6', '2': 'P', '3': 'E', '4': 'L', '5': 'N', '6': 'P', '7': 'P', '8': 'P',
+             '9': 'P', '10': 'P', '11': 'P', '12': 'P', '13': 'P', '14': 'P', '15': 'P', '16': 'B', '17': 'S',
+             '18': 'S', '19': 'N', '20': 'O_16', '21': 'B', '22': 'N', '23': 'O_5', '24': 'N', '25': 'N',
+             '26': 'N', '27': 'N', '28': 'S', '29': 'P', '30': 'P', '31': 'P', '32': 'P', '33': 'N',
+             '34': 'N', '35': 'N', '36': 'N', '37': 'B', '38': 'P', '39': 'P', '40': 'N', '41': 'P',
+             '42': 'N', '43': 'N', '44': 'N', '45': 'P', '46': 'P', '47': 'P', '48': 'P', '49': 'P',
+             '50': 'B', '51': 'P', '52': 'P', '53': 'B', '54': 'P', '55': 'P', '56': 'N', '57': 'L'}
+
+    with open('ACIC2016_covariates.txt', 'w') as file:
+        file.write(json.dumps(dists))  # use `json.loads` to do the reverse
+
+    x = df_covs.values
+
+    # reorder colums so that they are group in P, B, O, N, S, L, E
+    p_indices = []
+    b_indices = []
+    e_indices = []
+    l_indices = []
+    n_indices = []
+    o_indices = []
+    s_indices = []
+    for key in dists.keys():
+        if 'P' in dists[key]:
+            p_indices.append(int(key))
+        if 'B' in dists[key]:
+            b_indices.append(int(key))
+        if 'E' in dists[key]:
+            e_indices.append(int(key))
+        if 'L' in dists[key]:
+            l_indices.append(int(key))
+        if 'N' in dists[key]:
+            n_indices.append(int(key))
+        if 'O' in dists[key]:
+            o_indices.append(int(key))
+        if 'S' in dists[key]:
+            s_indices.append(int(key))
+    all_indices = [p_indices, b_indices, o_indices, n_indices, s_indices, l_indices, e_indices]
+    ordered_list = p_indices + b_indices + o_indices + n_indices + s_indices + l_indices + e_indices
+    cat_dims = [6, 16, 5]  # the number of categories in the three OHCat dists
+
+    df_outcomes = pd.read_csv(os.path.join(path, 'rep_{}'.format(reps), 'output_{}.csv'.format(param_setting)))
+    t = df_outcomes['t'].values
+    y = df_outcomes['y'].values
+    y0 = df_outcomes['y0'].values
+    y1 = df_outcomes['y1'].values
+    mu_0 = df_outcomes['mu0'].values
+    mu_1 = df_outcomes['mu1'].values
+    e = df_outcomes['e'].values
+    true_cate = (mu_1 - mu_0).reshape(-1, 1)
+
+    train_frac = 0.9
+    index = np.arange(len(x))
+    np.random.shuffle(index)
+    train_index = index[:int(len(x) * train_frac)]
+    test_index = index[int(len(x) * train_frac):]
+    x_train = torch.from_numpy(x[train_index])
+    x_test = torch.from_numpy(x[test_index])
+    print(true_cate.shape)
+
+    t_train = torch.from_numpy(t[train_index])
+    t_test = torch.from_numpy(t[test_index])
+    y_train = torch.from_numpy(y[train_index])
+    y_test = torch.from_numpy(y[test_index])
+    true_cate_train = torch.from_numpy(true_cate[train_index])
+    true_cate_test = torch.from_numpy(true_cate[test_index])
+
+    if cuda:
+        x_train = x_train.cuda()
+        x_test = x_test.cuda()
+        t_train = t_train.cuda()
+        t_test = t_test.cuda()
+        y_train = y_train.cuda()
+        y_test = y_test.cuda()
+        true_cate_train = true_cate_train.cuda()
+        true_cate_test = true_cate_test.cuda()
+    train = (x_train, t_train, y_train), true_cate_train
+    test = (x_test, t_test, y_test), true_cate_test
+
+    return train, test, all_indices, cat_dims
 
 
 def IHDP(path="./IHDP/", reps=1, cuda=True):

@@ -11,24 +11,24 @@ import numpy as np
 import torch
 import pyro
 from scipy.stats import sem
-from helpers import IHDP
-from TVAE_wrapper import TVAE
+from helpers import ACIC_2016
+from TVAE_wrapper_ACIC2016 import TVAE
 from sklearn.model_selection import train_test_split
 
-def main(args, reptition=1, path="./ACIC_2018_overlap_data/"):
-    # pyro.enable_validation(__debug__)
+def main(args, reptition=1, path="./ACIC_2016/"):
+    pyro.enable_validation(__debug__)
     # if args.cuda:
     torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
     # Generate synthetic data.
     pyro.set_rng_seed(args.seed)
-    train, test, contfeats, binfeats = ACIC_2018(path=path, reps=reptition, cuda=True)
+    train, test, all_indices, cat_dims = ACIC_2016(path=path, reps=reptition, cuda=True, seed=args.seed)
     (x_train, t_train, y_train), true_ite_train = train
     (x_test, t_test, y_test), true_ite_test = test
 
     # split train further into train and val, but keep train subsuming val (as in CEVAE). This is possible because
     # model selection does not rely on supervision (causal effect is a missing data / counterfactual problem)
-	# 63/27/10 tr/va/te
+    # 63/27/10 tr/va/te
 
     _, iva = train_test_split(
         np.arange(x_train.shape[0]), test_size=0.3, random_state=args.seed)
@@ -41,11 +41,11 @@ def main(args, reptition=1, path="./ACIC_2018_overlap_data/"):
 
     ym, ys = y_train.mean(), y_train.std()
     y_train = (y_train - ym) / ys
-
+    print(x_train.device)
     # Train.
     pyro.set_rng_seed(args.seed)
     pyro.clear_param_store()
-    tvae = TVAE(feature_dim=x_train.shape[1], continuous_dim=contfeats, binary_dim=binfeats,
+    tvae = TVAE(feature_dim=x_train.shape[1], all_indices=all_indices, cat_dims=cat_dims,
                     outcome_dist='normal',
                     latent_dim_o=args.latent_dim_o, latent_dim_c=args.latent_dim_c, latent_dim_t=args.latent_dim_t,
                     latent_dim_y=args.latent_dim_y,
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     eate_oos_val = np.zeros((args.reps, 1))
     eate_oos = np.zeros((args.reps, 1))
     eate_ws = np.zeros((args.reps, 1))
-    path = "./ACIC_2018_overlap_data/"
+    path = "./ACIC_2016/"
     for i in range(args.reps):
         print("Dataset {:d}".format(i + 1))
         pehe_oos_val[i, 0], pehe_oos[i, 0], pehe_ws[i, 0], eate_oos_val[i, 0], eate_oos[i, 0], eate_ws[i, 0], ate, ate_hat = main(args,
