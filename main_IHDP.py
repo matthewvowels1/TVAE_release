@@ -28,7 +28,7 @@ def main(args, reptition=1, path="./IHDP/"):
 
     # split train further into train and val, but keep train subsuming val (as in CEVAE). This is possible because
     # model selection does not rely on supervision (causal effect is a missing data / counterfactual problem)
-	# 63/27/10 tr/va/te
+    # 63/27/10 tr/va/te
 
     _, iva = train_test_split(
         np.arange(x_train.shape[0]), test_size=0.3, random_state=args.seed)
@@ -64,7 +64,6 @@ def main(args, reptition=1, path="./IHDP/"):
     est_ite_oos, est_ate_oos = tvae.ite(x_test, ym, ys)
     est_ite_oos_val, est_ate_oos_val = tvae.ite(x_val, ym, ys)
     est_ite_ws, est_ate_ws = tvae.ite(x_train, ym, ys)
-
     pehe_oos_val = np.sqrt(np.mean(
         (true_ite_val.squeeze() - est_ite_oos_val.cpu().numpy()) * (true_ite_val.squeeze() - est_ite_oos_val.cpu().numpy())))
     pehe_oos = np.sqrt(np.mean(

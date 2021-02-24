@@ -358,7 +358,6 @@ class DiagGammaNet(DistributionNet):
         concrate = nn.functional.softplus(self.fc(x))
         conc = nn.functional.softplus(concrate[..., :self.dim]).clamp(min=-1e6, max=1e6)
         rate = nn.functional.softplus(concrate[..., self.dim:]).clamp(min=1e-3, max=1e6).reciprocal()
-        print(conc.min(), rate.min(), conc.max(), rate.max())
         return conc, rate
 
     @staticmethod

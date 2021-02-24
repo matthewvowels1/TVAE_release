@@ -161,7 +161,7 @@ class TVAE(nn.Module):
                 optim_main.zero_grad()
                 optim_treg.zero_grad()
                 total_loss = (main_loss + t_reg_loss) / x.size(0)
-                print("step {: >5d} loss = {:0.6g}".format(len(total_losses), total_loss))
+                # print("step {: >5d} loss = {:0.6g}".format(len(total_losses), total_loss))
                 assert not torch_isnan(total_loss)
                 total_losses.append(total_loss)
 

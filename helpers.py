@@ -174,7 +174,7 @@ def JOBS(path='./JOBS/', replication_start=0, replication_end=2, version=0, cuda
         return train, test, contfeats, bin_feats
 
 
-def ACIC_2016(path="./ACIC_2016/", reps=1, param_setting=1, cuda=True, seed=0):
+def ACIC_2016(path="./ACIC_2016/", setting=1, replication=1, cuda=True, seed=0):
     '''
     P = poisson
     B = bernoulli
@@ -246,7 +246,7 @@ def ACIC_2016(path="./ACIC_2016/", reps=1, param_setting=1, cuda=True, seed=0):
     ordered_list = p_indices + b_indices + o_indices + n_indices + s_indices + l_indices + e_indices
     cat_dims = [6, 16, 5]  # the number of categories in the three OHCat dists
 
-    df_outcomes = pd.read_csv(os.path.join(path, 'rep_{}'.format(reps), 'output_{}.csv'.format(param_setting)))
+    df_outcomes = pd.read_csv(os.path.join(path, 'rep_{}'.format(replication), 'output_{}.csv'.format(setting)))
     t = df_outcomes['t'].values
     y = df_outcomes['y'].values
     y0 = df_outcomes['y0'].values
@@ -263,10 +263,9 @@ def ACIC_2016(path="./ACIC_2016/", reps=1, param_setting=1, cuda=True, seed=0):
     test_index = index[int(len(x) * train_frac):]
     x_train = torch.from_numpy(x[train_index])
     x_test = torch.from_numpy(x[test_index])
-    print(true_cate.shape)
 
-    t_train = torch.from_numpy(t[train_index])
-    t_test = torch.from_numpy(t[test_index])
+    t_train = torch.from_numpy(t[train_index]).float()
+    t_test = torch.from_numpy(t[test_index]).float()
     y_train = torch.from_numpy(y[train_index])
     y_test = torch.from_numpy(y[test_index])
     true_cate_train = torch.from_numpy(true_cate[train_index])
