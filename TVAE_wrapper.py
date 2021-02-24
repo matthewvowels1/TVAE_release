@@ -1,6 +1,7 @@
 
 '''
-***Closely based on code for TEDVAE by Weijia Zhang***
+
+***Based on code for TEDVAE by Weijia Zhang***
 https://github.com/WeijiaZhang24/TEDVAE
 See also the paper:
 Zhang, W., Liu, L., and Li, J. (2020) Treatment effect estimation with disentangled
