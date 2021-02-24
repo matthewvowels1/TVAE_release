@@ -1,6 +1,5 @@
 
 '''
-
 ***Based on code for TEDVAE by Weijia Zhang***
 https://github.com/WeijiaZhang24/TEDVAE
 See also the paper:
