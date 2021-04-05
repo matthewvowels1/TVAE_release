@@ -50,7 +50,7 @@ python3 main_ACIC2016.py --tl_weight 0.3 --latent_dim_o 5 --latent_dim_c 15 --la
 
 ## References:
 
-Code heavily derived from TEDVAE by Weijia Zhang
+Code adapted from TEDVAE by Weijia Zhang
 https://github.com/WeijiaZhang24/TEDVAE
 
 See also the paper:
