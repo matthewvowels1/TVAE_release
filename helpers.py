@@ -43,7 +43,7 @@ def policy_val(ypred1, ypred0, y, t):
         elif (ypred1[l] - ypred0[l]) <= 0:
             num2 += 1
     p_fx1 = num1 / (num1 + num2)
-    R = 1 - ((y1 / len(index1)) * p_fx1 + (y0 / len(index0)) * (1 - p_fx1))
+    R = 1 - ((y1 / len(index1)) * p_fx1 + (y0 / len(index0)) * (1 - p_fx1))  # this is the policy RISK  i.e. (1 - policy_val)
     return R
 
 
