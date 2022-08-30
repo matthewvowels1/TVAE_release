@@ -46,6 +46,8 @@ python3 main_ACIC2016.py --tl_weight 0.3 --latent_dim_o 5 --latent_dim_c 15 --la
 ```
 
 
+## TODO
+Check implementation of policy risk evaluation metric
 
 
 
