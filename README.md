@@ -1,5 +1,7 @@
 # TVAE_release
-TVAE release version.
+Targeted Variational AutoEncoder release.
+
+https://arxiv.org/abs/2009.13472
 
 ## Instructions for Reproducing Results:
 
